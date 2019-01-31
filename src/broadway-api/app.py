@@ -3,11 +3,11 @@ import logging.config
 import s3fs
 import json
 import boto3
-
+import json
 import pandas as pd
 
 from chalice import Chalice, Response
-from modules import DataService
+from modules.Services import DataService
 
 
 
@@ -39,14 +39,25 @@ def index():
 
 
 """
-@app.route('/performances/broadway/{year}', methods=["GET"]):
+@app.route('/performances/broadway/{year}', methods=["GET"])
 def return_dataset_by_year(year):
     if app.current_request.method == "GET":
         query_params = app.current_request.query_params
-        dataset = DataService(braodway_dataset[broadway_dataset["Year"] == int(year)])
-        if len(query_params) > 0:
+        dataset = DataService.DataManager(broadway_dataset[broadway_dataset["Year"] == int(year)])
+        if query_params is not None:
             dataset.apply_params(query_params)
-        
+        if dataset.status_code == 200 or dataset.status_code is None:
+            response_body = json.dumps({
+                "transformations_made": dataset.transformations_made,
+                "data": dataset.data.to_json(orient="records", lines=True)
+            }, sort_keys=True, indent=6)
+            headers = {
+                "Content-Type": "application/json"
+            }
+            return Response(status_code=200, body=response_body, headers=headers)
+        else:
+            return Response(status_code=dataset.status_code, body=dataset.data, headers={"Content-Type":"application/json"})
+
 
 
 

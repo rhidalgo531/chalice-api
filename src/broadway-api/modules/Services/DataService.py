@@ -12,19 +12,24 @@ class DataManager(object):
     def __init__(self, data):
         self.data = data
         self.status_code = None
+        self.transformations_made = 0
 
 
     def calculate_gross(self):
-        self.data = self.data.groupby(["Name"])[["Gross"]].sum()
+        self.data = self.data.groupby(["Name"])[["Gross"]].sum().sort_values(['Gross'], ascending=False).reset_index()
+        self.transformations_made += 1
 
     def calculate_count(self):
-        self.data = self.data.groupby(["Name"]).count()
+        self.data = self.data.groupby(["Name"]).size().reset_index(name='Performances')
+        self.transformations_made += 1
 
     def sort_by_column(self, column):
         self.data = self.data.sort_values(by=column, ascending=False).reset_index()
+        self.transformations_made += 1
 
     def limit_dataset(self, limit):
-        self.data = self.data.head(limit)
+        self.data = self.data.head(int(limit))
+        self.transformations_made += 1
 
     def apply_params(self, params):
         try:
@@ -41,9 +46,7 @@ class DataManager(object):
                 self.sort_by_column(params["sort"])
             if "limit" in params:
                 self.limit_dataset(params["limit"])
+            self.status_code = 200
         except Exception as e:
             print(e)
             self.status_code = 400
-
-    def generate_simple_response(self):
-        pass
