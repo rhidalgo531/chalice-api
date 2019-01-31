@@ -1,4 +1,9 @@
+import logging
+import logging.config
+import s3fs
+
 from chalice import Chalice, Response
+import pandas as pd
 
 
 
@@ -6,6 +11,7 @@ from chalice import Chalice, Response
 app = Chalice(app_name='broadway-api')
 app.debug = True
 
+broadway_dataset = pd.read_csv("s3://rmh391-broadway/yearly_gross.csv")
 
 @app.route('/')
 def index():
@@ -25,7 +31,8 @@ def index():
 """
 @app.route('/performances/broadway/{year}', methods=["GET"]):
 def return_dataset_by_year(year):
-    
+    if app.current_request.method == "GET":
+
 
 
 
