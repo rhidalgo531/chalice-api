@@ -1,0 +1,54 @@
+
+
+
+Notes for Assignment:
+
+Design:
+
+  I chose to base the API around a broadway dataset downloaed from https://think.cs.vt.edu/corgis/csv/broadway/broadway.html and uploaded to S3.
+  The main goal of the API is to provide data regarding broadway performances, with a date granularity of month. With that in mind I used "performances"
+  as the collection, seeing as there are other types of productions other than "broadway", keeping in mind that the API at full scale could provide
+  much more data. However, for this project "broadway" is the main resource for transforming the public data.
+
+  With the data stored in S3, and since the csv seems to be unsupported (latest year is 2016), I chose to do a one-time retrieval, at the time of deployment.
+  If the data were constantly updated I imagine the bucket would be updated frequently and the API would have to retrieve data from the bucket, cache, and
+  re-try on expiration of the cache.
+
+  Outside of that choice, I also decided to use pandas as the main data transformation engine. The data is small enough where pandas is useful, but there are
+  inconveniences with it (ex ~ depending on how a column is accessed ["Name"] vs [["Name"]], a Series is returned vs a DataFrame, which may give valid results but not
+  the exact results needed (ex ~ providing only total sums by index instead of total sums by columns).
+
+
+
+Instruction 1:
+
+    I used the base endpoint, "/" to display the status. I went back and forth between "/" and "/status" but ultimately felt the "/" url would be easier to remember and quicker to use.
+    In it I return a response containing information about the end points and query parameters, with examples. This is essentially documentation for using the api. A developer can quicky
+    hit this endpoint and see the endpoints available, which would be actively maintained when more endpoints are provided. Ideally this could be in a yaml or json file and then returned.
+
+
+Instruction 2:
+
+  The /performances/broadway/{year} endpoint does most of the work. It takes in the request and queries the dataframe by using built-in pandas methods. The possibe applications are to 
+  return the data as is, depending on the year, or return a transformed version depending on the mixture of query parameters (sort, limit, metric). For example, a client can request the
+  full dataset from 2009 limited to only the first 10 sorted by name by using the parameters ?sort=Name&limit=10
+
+  The metric param is similar to a stored procedure. There are two methods for generating either total gross or total performances done by a show in a given year. The client can still sort or apply a limit
+  but the general logic of counting or summing isn't available for other fields.
+
+  There is a DataService.py file that takes the data and checks if each query param is in the request dictionary. The logic could have been added in the app.py file but by separating the files this way
+  I can unit test the transformation logic without dealing with any coupling of the routing logic. This also allows for portability in case either file needs to be changed or a different framework is needed.
+
+
+  Instruction 3:
+
+    The /performances/html endpoint retrieves the html document stored on AWS S3. I added one png and two jpg files to a carousel using bootstrap and did minor styling to display the images. I used the AWS file url
+    as the value for the image source, which was doable because I made the S3 images public. There was a thought over whether or not to make them private and provide API keys through javascript, but since the rest of the program did not
+    use security measures I decided against it.
+
+
+Further Work:
+
+There are many limitations on the query parameters as it stands. There isn't any validation done on them, to ensure data types or safe guard against injections or escape characters. You also
+cannot choose which way to sort, ascending or descending, and is defaulted to descending. Both would be useful, along with added security for cross origin. I saw in the chalice documentation
+they provide the ability to customize a CORS object to specify allowed origins, which is a start.
