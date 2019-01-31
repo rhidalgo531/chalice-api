@@ -4,8 +4,10 @@ import s3fs
 import json
 import boto3
 
-from chalice import Chalice, Response
 import pandas as pd
+
+from chalice import Chalice, Response
+from modules import DataService 
 
 
 
@@ -40,6 +42,9 @@ def index():
 @app.route('/performances/broadway/{year}', methods=["GET"]):
 def return_dataset_by_year(year):
     if app.current_request.method == "GET":
+        query_params = app.current_request.query_params
+        dataset = braodway_dataset[broadway_dataset["Year"] == int(year)]
+
 
 
 
