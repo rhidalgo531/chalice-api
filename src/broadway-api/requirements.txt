@@ -1,0 +1,3 @@
+pandas
+chalice
+s3fs
