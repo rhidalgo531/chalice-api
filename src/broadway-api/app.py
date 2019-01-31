@@ -57,3 +57,16 @@ def return_dataset_by_year(year):
             return Response(status_code=200, body=response_body, headers=headers)
         else:
             return Response(status_code=dataset.status_code, body=dataset.data, headers={"Content-Type":"application/json"})
+
+
+@app.route('/performances/html', methods=["GET"])
+def return_html_object_location():
+    return Response(
+        status_code=200,
+        headers={"Content-Type":"application/json"},
+        body=json.dumps({
+            "topic": "HTML Page Location on AWS S3 for third instruction",
+            "AWS Availability": "Open to Public",
+            "location":"https://s3.amazonaws.com/rmh391-broadway/index.html",
+            "summary": "Simple index page with carousel made using bootstrap cdn"
+            }, indent=6, sort_keys=True))
