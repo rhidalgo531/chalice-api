@@ -7,7 +7,7 @@ import boto3
 import pandas as pd
 
 from chalice import Chalice, Response
-from modules import DataService 
+from modules import DataService
 
 
 
@@ -43,7 +43,10 @@ def index():
 def return_dataset_by_year(year):
     if app.current_request.method == "GET":
         query_params = app.current_request.query_params
-        dataset = braodway_dataset[broadway_dataset["Year"] == int(year)]
+        dataset = DataService(braodway_dataset[broadway_dataset["Year"] == int(year)])
+        if len(query_params) > 0:
+            dataset.apply_params(query_params)
+        
 
 
 
