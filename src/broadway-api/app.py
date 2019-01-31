@@ -23,9 +23,25 @@ logger.info("Initialized Logger")
 
 broadway_dataset = pd.read_csv("s3://rmh391-broadway/yearly_gross.csv")
 
-@app.route('/')
-def index():
-    return {'hello': 'world'}
+
+"""
+    Return status information about the API and the end points available
+"""
+@app.route('/', methods=["GET"])
+def status():
+    dataset_schema = pd.io.json.build_table_schema(broadway_dataset)
+    return Response(status_code=200, body=json.dumps(
+        {"Current Status": "Humming Along",
+            "Dataset Schema":dataset_schema,
+            "Endpoints": [
+                {"url":"/performances/html","query parameters": []},
+                {"url":"/performances/broadway/{year}", "query parameters":  [
+                    {"Name": "sort", "Use": "Sort by a dataframe column, as-is", "Example": "?sort=Name"},
+                    {"Name": "limit", "Use":"Limit the amount of rows from dataset returned by server", "Example":"?limit=15"},
+                    {"Name": "metric", "Use":"Calculate one of two metrics : sum of total gross, or count of total performances","Example":"?metric=gross/count"}
+                ]}
+            ]
+        },indent=6, sort_keys=False), headers={"Content-Type":"application/json"})
 
 
 
