@@ -1,3 +1,4 @@
 pandas
 chalice
 s3fs
+boto3

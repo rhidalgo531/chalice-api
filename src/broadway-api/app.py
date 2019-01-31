@@ -1,15 +1,23 @@
 import logging
 import logging.config
 import s3fs
+import json
+import boto3
 
 from chalice import Chalice, Response
 import pandas as pd
 
 
 
-
 app = Chalice(app_name='broadway-api')
 app.debug = True
+
+logging.config.fileConfig('logs.conf')
+logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.DEBUG)
+logger.info("Initialized Logger")
+
 
 broadway_dataset = pd.read_csv("s3://rmh391-broadway/yearly_gross.csv")
 
